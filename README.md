@@ -14,6 +14,22 @@
 
 Яебук скачивает книги из сервиса Яндекс Книги в формате, подходящем для просмотра на iPad, Kindle и других читалках.
 
+## Установка
+
+### Скрипт
+
+```bash
+curl --proto '=https' --tlsv1.2 -LsSf \
+    https://github.com/mishamyrt/yaebook/releases/latest/download/yaebook-installer.sh | sh
+```
+
+### Brew (macOS)
+
+```bash
+brew tap mishamyrt/tap
+brew install yaebook
+```
+
 ## Получение токена
 
 Нужен токен Яндекса формат: `y0_AgAAAA...`
