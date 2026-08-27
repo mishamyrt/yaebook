@@ -1,0 +1,77 @@
+[workspace]
+members = ["crates/*"]
+resolver = "3"
+
+[workspace.package]
+authors = ["Mikhael Khrustik <misha@myrt.co>"]
+description = "Yandex Books EPUB downloader"
+documentation = "https://github.com/mishamyrt/yaebook"
+edition = "2024"
+homepage = "https://github.com/mishamyrt/yaebook"
+license = "MIT"
+repository = "https://github.com/mishamyrt/yaebook"
+rust-version = "1.98"
+version = "0.1.0"
+
+[workspace.dependencies]
+yaebook-epub = { path = "crates/yaebook-epub" }
+yaebook-core = { path = "crates/yaebook-core" }
+yaebook = { path = "crates/yaebook" }
+
+flate2 = { version = "1.1.9", default-features = false }
+html5ever = "0.27.0"
+markup5ever_rcdom = "0.3.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+thiserror = "2.0.17"
+time = { version = "0.3.44", default-features = false }
+ureq = { version = "2.12.1", default-features = false }
+xmltree = "0.11.0"
+zip = { version = "2.4.2", default-features = false }
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = "z"
+panic = "abort"
+strip = true
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+
+[workspace.lints.rust]
+unsafe_code = "warn"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -2 }
+# Allowed pedantic lints
+char_lit_as_u8 = "allow"
+collapsible_else_if = "allow"
+collapsible_if = "allow"
+implicit_hasher = "allow"
+map_unwrap_or = "allow"
+match_same_arms = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+similar_names = "allow"
+struct_excessive_bools = "allow"
+too_many_arguments = "allow"
+too_many_lines = "allow"
+used_underscore_binding = "allow"
+# Disallowed restriction lints
+print_stdout = "warn"
+print_stderr = "warn"
+dbg_macro = "warn"
+empty_drop = "warn"
+empty_structs_with_brackets = "warn"
+exit = "warn"
+get_unwrap = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+if_not_else = "allow"
+use_self = "warn"

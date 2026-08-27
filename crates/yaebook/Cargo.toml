@@ -1,0 +1,25 @@
+[package]
+name = "yaebook"
+description = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+rust-version = { workspace = true }
+homepage = { workspace = true }
+documentation = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+version = { workspace = true }
+
+[[bin]]
+name = "yaebook"
+path = "src/main.rs"
+
+[dependencies]
+yaebook-core = { workspace = true }
+yaebook-epub = { workspace = true }
+
+[lints]
+workspace = true
+
+[package.metadata.dist]
+dist = true

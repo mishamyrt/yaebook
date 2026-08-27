@@ -1,0 +1,26 @@
+[package]
+name = "yaebook-epub"
+authors = { workspace = true }
+edition = { workspace = true }
+rust-version = { workspace = true }
+homepage = { workspace = true }
+documentation = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+version = "0.0.0"
+
+[dependencies]
+flate2 = { workspace = true, features = ["rust_backend"] }
+html5ever = { workspace = true }
+markup5ever_rcdom = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true, features = ["formatting", "std"] }
+xmltree = { workspace = true }
+yaebook-core = { workspace = true }
+zip = { workspace = true, features = ["deflate-flate2", "flate2"] }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true
