@@ -3,7 +3,7 @@
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -21,6 +21,10 @@ pub enum Error {
     InvalidToken,
     #[error("the book is unavailable for reading with this account")]
     Unavailable,
+    #[error(
+        "this token only allows a free sample of the book; an active subscription is required"
+    )]
+    SampleOnly,
     #[error("Yandex Books returned error {0}")]
     Http(u16),
     #[error("could not connect to Yandex Books: {0}")]
@@ -95,6 +99,13 @@ impl Client {
 
         if book.get("can_be_read").and_then(Value::as_bool) == Some(false) {
             return Err(Error::Unavailable);
+        }
+        if let Some(level) = book.get("subscription_level").and_then(Value::as_str) {
+            let access =
+                self.request_json(&format!("{BASE_URL}/profile/access_levels"))?;
+            if !has_full_access(&access, level) {
+                return Err(Error::SampleOnly);
+            }
         }
 
         let metadata = extract_metadata(root, book, uuid);
@@ -365,6 +376,23 @@ fn object(value: &Value) -> &Map<String, Value> {
     value.as_object().unwrap_or(&EMPTY)
 }
 
+fn has_full_access(access: &Value, level: &str) -> bool {
+    let now =
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+    access
+        .pointer("/access_levels/expiration_dates")
+        .and_then(Value::as_array)
+        .is_some_and(|dates| {
+            dates.iter().any(|date| {
+                date.get("level").and_then(Value::as_str) == Some(level)
+                    && date
+                        .get("expires_at")
+                        .and_then(Value::as_u64)
+                        .is_some_and(|expires_at| expires_at > now)
+            })
+        })
+}
+
 fn string(value: Option<&Value>) -> Option<String> {
     value.and_then(Value::as_str).map(str::to_owned)
 }
@@ -402,7 +430,24 @@ fn valid_uuid(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
     use std::net::TcpListener;
+
+    #[test]
+    fn requires_an_unexpired_matching_access_level() {
+        let full = json!({"access_levels": {"expiration_dates": [
+            {"level": "bookmate", "expires_at": u64::MAX}
+        ]}});
+        let trial = json!({"access_levels": {"expiration_dates": []}});
+        let expired = json!({"access_levels": {"expiration_dates": [
+            {"level": "bookmate", "expires_at": 1}
+        ]}});
+
+        assert!(has_full_access(&full, "bookmate"));
+        assert!(!has_full_access(&full, "simple_bookmate"));
+        assert!(!has_full_access(&trial, "bookmate"));
+        assert!(!has_full_access(&expired, "bookmate"));
+    }
 
     #[test]
     fn client_has_an_https_backend() {
